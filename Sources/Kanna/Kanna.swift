@@ -39,7 +39,9 @@ public enum ParseOption {
     case htmlParseUseLibxml(Libxml2HTMLParserOptions)
 }
 
-public let kDefaultXmlParseOption   = ParseOption.xmlParseUseLibxml([.RECOVER, .NOERROR, .NOWARNING])
+// .NODICT was added due to memory problems. `testXML_InsertChild` crashes on `libxmlXMLDocument.deinit`, stating "pointer being freed was not allocated"
+// You can see libxml issue directly here: https://gist.github.com/davestevens/3038874/revisions
+public let kDefaultXmlParseOption   = ParseOption.xmlParseUseLibxml([.RECOVER, .NOERROR, .NOWARNING, .NODICT])
 public let kDefaultHtmlParseOption  = ParseOption.htmlParseUseLibxml([.RECOVER, .NOERROR, .NOWARNING])
 
 public enum ParseError: Error {
