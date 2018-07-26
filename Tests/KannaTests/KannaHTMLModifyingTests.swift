@@ -53,12 +53,69 @@ class KannaHTMLModifyingTests: XCTestCase {
             XCTAssert(doc.body!.toHTML == modifyNextHTML)
         }
     }
+    
+    func testHTML_InsertChild() {
+        let html = "<body><div>A love triangle.<h1>Three's Company</h1></div><div>This is the last one</div></body>"
+        let item = "<div>added</div>"
+        
+        // Inserts into correct place
+        do {
+            guard let doc = try? HTML(html: html, encoding: .utf8), let element = try? HTML(html: item, encoding: .utf8) else {
+                XCTFail()
+                return
+            }
+            
+            let elementNode = element.at_css("div")
+            doc.body?.insertChild(elementNode!, at: 1)
+            
+            let items = doc.css("div")
+            XCTAssertEqual(items.count, 3)
+            XCTAssertEqual(items[1].content, "added")
+            XCTAssertEqual(items[0].content, "A love triangle.Three\'s Company")
+            XCTAssertEqual(items[2].content, "This is the last one")
+        }
+        
+        // Inserts as firsr
+        do {
+            guard let doc = try? HTML(html: html, encoding: .utf8), let element = try? HTML(html: item, encoding: .utf8) else {
+                XCTFail()
+                return
+            }
+            
+            let elementNode = element.at_css("div")
+            doc.body?.insertChild(elementNode!, at: 0)
+            
+            let items = doc.css("div")
+            XCTAssertEqual(items.count, 3)
+            XCTAssertEqual(items[0].content, "added")
+            XCTAssertEqual(items[1].content, "A love triangle.Three\'s Company")
+            XCTAssertEqual(items[2].content, "This is the last one")
+        }
+        
+        // Adds child node at the end of the list `at` if higher then number of nodes
+        do {
+            guard let doc = try? HTML(html: html, encoding: .utf8), let element = try? HTML(html: item, encoding: .utf8) else {
+                XCTFail()
+                return
+            }
+            
+            let elementNode = element.at_css("div")
+            doc.body?.insertChild(elementNode!, at: 100)
+            
+            let items = doc.css("div")
+            XCTAssertEqual(items.count, 3)
+            XCTAssertEqual(items[2].content, "added")
+            XCTAssertEqual(items[0].content, "A love triangle.Three\'s Company")
+            XCTAssertEqual(items[1].content, "This is the last one")
+        }
+    }
 }
 
 extension KannaHTMLModifyingTests {
     static var allTests: [(String, (KannaHTMLModifyingTests) -> () throws -> Void)] {
         return [
-            ("testHTML_MovingNode", testHTML_MovingNode)
+            ("testHTML_MovingNode", testHTML_MovingNode),
+            ("testHTML_InsertChild", testHTML_InsertChild)
         ]
     }
 }

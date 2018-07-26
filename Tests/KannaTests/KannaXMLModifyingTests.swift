@@ -53,12 +53,72 @@ class KannaXMLModifyingTests: XCTestCase {
             XCTAssert(doc.at_css("all_item")!.toXML == modifyNextXML)
         }
     }
+    
+    func testXML_InsertChild() {
+        let xml = "<?xml version=\"1.0\"?><all_item><item><title>item0</title></item><item><title>item1</title></item></all_item>"
+        let item = "<?xml version=\"1.0\"?><item>added</item>"
+        
+        // Inserts into correct place
+        do {
+            guard let doc = try? XML(xml: xml, encoding: .utf8), let element = try? XML(xml: item, encoding: .utf8) else {
+                XCTFail()
+                return
+            }
+            
+            let elementNode = element.at_css("item")
+            let parent = doc.at_css("all_item")
+            parent?.insertChild(elementNode!, at: 1)
+
+            let items = doc.css("item")
+            XCTAssertEqual(items.count, 3)
+            XCTAssertEqual(items[1].content, "added")
+            XCTAssertEqual(items[0].content, "item0")
+            XCTAssertEqual(items[2].content, "item1")
+        }
+        
+        // Inserts node as first
+        do {
+            guard let doc = try? XML(xml: xml, encoding: .utf8), let element = try? XML(xml: item, encoding: .utf8) else {
+                XCTFail()
+                return
+            }
+            
+            let elementNode = element.at_css("item")
+            let parent = doc.at_css("all_item")
+            parent?.insertChild(elementNode!, at: 0)
+            
+            let items = doc.css("item")
+            XCTAssertEqual(items.count, 3)
+            XCTAssertEqual(items[0].content, "added")
+            XCTAssertEqual(items[1].content, "item0")
+            XCTAssertEqual(items[2].content, "item1")
+        }
+        
+        // Adds child node at the end of the list `at` if higher then number of nodes
+        do {
+            guard let doc = try? XML(xml: xml, encoding: .utf8), let element = try? XML(xml: item, encoding: .utf8) else {
+                XCTFail()
+                return
+            }
+            
+            let elementNode = element.at_css("item")
+            let parent = doc.at_css("all_item")
+            parent?.insertChild(elementNode!, at: 100)
+            
+            let items = doc.css("item")
+            XCTAssertEqual(items.count, 3)
+            XCTAssertEqual(items[2].content, "added")
+            XCTAssertEqual(items[0].content, "item0")
+            XCTAssertEqual(items[1].content, "item1")
+        }
+    }
 }
 
 extension KannaXMLModifyingTests {
     static var allTests: [(String, (KannaXMLModifyingTests) -> () throws -> Void)] {
         return [
             ("testXML_MovingNode", testXML_MovingNode),
+            ("testXML_InsertChild", testXML_InsertChild)
         ]
     }
 }
