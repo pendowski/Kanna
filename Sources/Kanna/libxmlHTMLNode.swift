@@ -250,6 +250,29 @@ internal final class libxmlHTMLNode: XMLElement {
         xmlAddChild(nodePtr, node.nodePtr)
     }
     
+    func insertChild(_ node: XMLElement, at: Int) {
+        guard let node = node as? libxmlHTMLNode else {
+            return
+        }
+        let number = xmlChildElementCount(nodePtr)
+        var child = nodePtr?.pointee.children
+        guard number >= at, child != nil else {
+            addChild(node)
+            return
+        }
+        
+        if at == 0 {
+            xmlAddPrevSibling(child, node.nodePtr)
+            return
+        }
+        
+        for _ in 0 ..< at - 1 { // - 1 since we already have one
+            child = child?.pointee.next
+        }
+        
+        xmlAddNextSibling(child, node.nodePtr)
+    }
+    
     func removeChild(_ node: XMLElement) {
         
         guard let node = node as? libxmlHTMLNode else {
