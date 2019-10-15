@@ -24,11 +24,7 @@ SOFTWARE.
 */
 import Foundation
 
-#if SWIFT_PACKAGE
-import SwiftClibxml2
-#else
 import libxmlKanna
-#endif
 
 /*
 ParseOption
@@ -58,7 +54,7 @@ Parse XML
 @param encoding the document encoding
 @param options  a ParserOption
 */
-public func XML(xml: String, url: String?, encoding: String.Encoding, option: ParseOption = kDefaultXmlParseOption) throws -> XMLDocument {
+public func XML(xml: String, url: String? = nil, encoding: String.Encoding, option: ParseOption = kDefaultXmlParseOption) throws -> XMLDocument {
     switch option {
     case .xmlParseUseLibxml(let opt):
         return try libxmlXMLDocument(xml: xml, url: url, encoding: encoding, option: opt.rawValue)
@@ -67,20 +63,12 @@ public func XML(xml: String, url: String?, encoding: String.Encoding, option: Pa
     }
 }
 
-public func XML(xml: String, encoding: String.Encoding, option: ParseOption = kDefaultXmlParseOption) throws -> XMLDocument {
-    return try XML(xml: xml, url: nil, encoding: encoding, option: option)
-}
-
 // NSData
-public func XML(xml: Data, url: String?, encoding: String.Encoding, option: ParseOption = kDefaultXmlParseOption) throws -> XMLDocument {
+public func XML(xml: Data, url: String? = nil, encoding: String.Encoding, option: ParseOption = kDefaultXmlParseOption) throws -> XMLDocument {
     guard let xmlStr = String(data: xml, encoding: encoding) else {
         throw ParseError.EncodingMismatch
     }
     return try XML(xml: xmlStr, url: url, encoding: encoding, option: option)
-}
-
-public func XML(xml: Data, encoding: String.Encoding, option: ParseOption = kDefaultXmlParseOption) throws -> XMLDocument {
-    return try XML(xml: xml, url: nil, encoding: encoding, option: option)
 }
 
 // NSURL
@@ -99,7 +87,7 @@ Parse HTML
 @param encoding the document encoding
 @param options  a ParserOption
 */
-public func HTML(html: String, url: String?, encoding: String.Encoding, option: ParseOption = kDefaultHtmlParseOption) throws -> HTMLDocument {
+public func HTML(html: String, url: String? = nil, encoding: String.Encoding, option: ParseOption = kDefaultHtmlParseOption) throws -> HTMLDocument {
     switch option {
     case .htmlParseUseLibxml(let opt):
         return try libxmlHTMLDocument(html: html, url: url, encoding: encoding, option: opt.rawValue)
@@ -108,20 +96,12 @@ public func HTML(html: String, url: String?, encoding: String.Encoding, option: 
     }
 }
 
-public func HTML(html: String, encoding: String.Encoding, option: ParseOption = kDefaultHtmlParseOption) throws -> HTMLDocument {
-    return try HTML(html: html, url: nil, encoding: encoding, option: option)
-}
-
 // NSData
-public func HTML(html: Data, url: String?, encoding: String.Encoding, option: ParseOption = kDefaultHtmlParseOption) throws -> HTMLDocument {
+public func HTML(html: Data, url: String? = nil, encoding: String.Encoding, option: ParseOption = kDefaultHtmlParseOption) throws -> HTMLDocument {
     guard let htmlStr = String(data: html, encoding: encoding) else {
         throw ParseError.EncodingMismatch
     }
     return try HTML(html: htmlStr, url: url, encoding: encoding, option: option)
-}
-
-public func HTML(html: Data, encoding: String.Encoding, option: ParseOption = kDefaultHtmlParseOption) throws -> HTMLDocument {
-    return try HTML(html: html, url: nil, encoding: encoding, option: option)
 }
 
 // NSURL
@@ -192,6 +172,7 @@ public protocol XMLElement: SearchableNode {
 XMLDocument
 */
 public protocol XMLDocument: class, SearchableNode {
+    var namespaces: [Namespace] { get }
 }
 
 /**
@@ -280,6 +261,14 @@ extension XMLNodeSet: Sequence {
             return nil
         }
     }
+}
+
+/**
+ Namespace
+ */
+public struct Namespace {
+    public let prefix: String
+    public let name: String
 }
 
 /**

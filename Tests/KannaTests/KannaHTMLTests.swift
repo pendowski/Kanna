@@ -116,13 +116,17 @@ class KannaHTMLTests: XCTestCase {
             XCTAssert(false, "File not found. name: (\(filename)), error: \(error)")
         }
     }
-    
+
     func testNSURL() {
+        // Due to bugs, this test will fail on older versions of Swift for Linux.
+        // https://github.com/apple/swift-corelibs-foundation/pull/1499
+        #if !os(Linux) || swift(>=4.2)
         guard let url = URL(string: "https://en.wikipedia.org/wiki/Cat"),
               let _ = try? HTML(url: url, encoding: .utf8) else {
             XCTAssert(false)
             return
         }
+        #endif
     }
 
     func testNextPreviousSibling() {
@@ -178,6 +182,21 @@ class KannaHTMLTests: XCTestCase {
 
         for element in elements {
             XCTAssert(element.text! == "def")
+        }
+    }
+
+    func testNoTagElement() {
+        let input = """
+        <div>
+        <style>@media all and (max-width:720px){.mw-parser-output .tmulti>.thumbinner{width:100%!important;max-width:none!important}.mw-parser-output .tmulti .tsingle{float:none!important;max-width:none!important;width:100%!important;text-align:center}}</style>
+        </div>
+        """
+
+        do {
+            let doc = try HTML(html: input, encoding: .utf8)
+            XCTAssertNil(doc.body?.at_xpath("//style/child::text()")?.tagName)
+        } catch {
+            XCTFail()
         }
     }
 }
